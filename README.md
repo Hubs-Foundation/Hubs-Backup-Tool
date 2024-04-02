@@ -2,7 +2,7 @@
 
 This tool let you backup your assets from a Hubs instance (Demo Hub, Hubs Subscription Service or your own instance).
 
-You can get the binary version of the tool from the releases section. 
+You can get the executable version of the tool from the [releases](https://github.com/MozillaReality/Hubs-Backup-Tool/releases/tag/v1.0.0) section. 
 
 ### Running from the source
 - Clone this repository
