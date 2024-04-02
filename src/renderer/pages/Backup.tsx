@@ -8,8 +8,11 @@ import {
   Tooltip,
   IconButton,
   LinearProgress,
-  CircularProgress
+  CircularProgress,
+  Divider,
+  Avatar
 } from "@mui/material";
+import { grey } from '@mui/material/colors';
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../components/AuthProvider";
 import { useStorage } from "../hooks/useStorage";
@@ -184,6 +187,15 @@ export default function Backup(): JSX.Element {
 
   return (
     <form noValidate autoComplete="on">
+      <Avatar sx={{ width: 60, height: 60, position: "absolute", left: 130, top: 215, bgcolor: grey[700] }}>
+        1
+      </Avatar>
+      <Avatar sx={{ width: 60, height: 60, position: "absolute", left: 130, top: 437, bgcolor: grey[700] }}>
+        2
+      </Avatar>
+      <Avatar sx={{ width: 60, height: 60, position: "absolute", left: 130, top: 636, bgcolor: grey[700] }}>
+        3
+      </Avatar>
       <Grid
         container
         direction={"column"}
@@ -199,21 +211,22 @@ export default function Backup(): JSX.Element {
           justifyContent={"center"}
           alignItems={"center"}
         >
-          <Grid item xs={10}>
+          <Grid item xs={1} textAlign={"center"}>
+            <IconButton onClick={onSelectDirectory} disabled={running}>
+              <FolderIcon fontSize="large" />
+            </IconButton>
+          </Grid>
+          <Grid item xs={11}>
             <TextField
               variant="outlined"
-              placeholder=""
+              placeholder="Please select download location"
               required={true}
               fullWidth
               name="directory"
               value={directory}
               disabled={true}
+              onClick={onSelectDirectory}
             />
-          </Grid>
-          <Grid item xs={2} textAlign={"center"}>
-            <IconButton onClick={onSelectDirectory} disabled={running}>
-              <FolderIcon fontSize="large" />
-            </IconButton>
           </Grid>
         </Grid>
         <Grid item xs={12}>
@@ -234,6 +247,9 @@ export default function Backup(): JSX.Element {
           justifyContent={"center"}
           paddingTop={2}
         >
+          <Grid item xs={12} textAlign={"center"}>
+            <Divider />
+          </Grid>
           {/* Avatars */}
           <Grid
             container
@@ -399,6 +415,9 @@ export default function Backup(): JSX.Element {
               )}
             </Grid>
           </Grid>
+          <Grid item xs={12} textAlign={"center"} marginTop={1}>
+            <Divider />
+          </Grid>
           <Grid item xs={12} textAlign={"center"}>
             <FormControlLabel
               control={<Checkbox size={"small"} />}
@@ -425,7 +444,7 @@ export default function Backup(): JSX.Element {
         alignContent={"center"}
         justifyContent={"center"}
         alignItems={"center"}
-        paddingTop={2}
+        paddingTop={1}
       >
         <Grid item xs={6}>
           <Button
