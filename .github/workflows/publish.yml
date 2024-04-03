@@ -25,8 +25,32 @@ jobs:
       - name: Make
         run: npm run make -- --platform linux
       - name: Publish
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "hubs-backup-tool-linux-x64-${{ steps.package.outputs.version }}.zip"
           path: out/make/zip/linux/x64
+          if-no-files-found: error
+
+  build-darwin:
+    runs-on: macos-13
+    timeout-minutes: 20
+    steps:
+      - name: Configure
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get package info
+        id: package
+        uses: codex-team/action-nodejs-package-info@v1.1
+      - name: Build
+        run: npm ci
+      - name: Make
+        run: npm run make -- --platform darwin
+      - name: Publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: "hubs-backup-tool-darwin-x64-${{ steps.package.outputs.version }}.zip"
+          path: out/make/zip/darwin/x64
           if-no-files-found: error
