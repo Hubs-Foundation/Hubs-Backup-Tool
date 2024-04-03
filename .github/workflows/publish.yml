@@ -14,9 +14,12 @@ jobs:
       - name: Configure
         uses: actions/setup-node@v4
         with:
-          node-version: "16.16.0"
+          node-version: 20
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Get package info
+        id: package
+        uses: codex-team/action-nodejs-package-info@v1.1
       - name: Build
         run: npm ci
       - name: Make
@@ -24,5 +27,6 @@ jobs:
       - name: Publish
         uses: actions/upload-artifact@v3
         with:
+          name: "hubs-backup-tool-linux-x64-${{ steps.package.outputs.version }}.zip"
           path: out/make/zip/linux/x64
           if-no-files-found: error
