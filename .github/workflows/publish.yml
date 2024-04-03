@@ -1,0 +1,26 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Configure
+        uses: actions/setup-node@v4
+        with:
+          node-version: "16.16.0"
+      - name: Build
+        run: npm ci
+      - name: Make
+        run: npm run make -- --platform linux
+      - name: Publish
+        uses: actions/upload-artifact@v3
+        with:
+          path: out/make/zip/linux/x64
+          if-no-files-found: error
