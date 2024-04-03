@@ -29,7 +29,7 @@ export function useAuthentication(
   const [token, setToken] = useState("");
   const [accountId, setAccountId] = useState("");
   const [running, setRunning] = useState(false);
-  const [result, setResult] = useState(false);
+  const [result, setResult] = useState(null);
   const { updateCredentials } = useContext(AuthContext);
   const onAuthenticatedCallbackRef = useRef(onAuthenticated);
 
@@ -41,7 +41,7 @@ export function useAuthentication(
     (props: AuthProps) => {
       const { email, host, port } = props;
       (async () => {
-        setResult(false);
+        setResult(null);
         setRunning(true);
         try {
           const { token, accountId } = await window.hubs.authReticulum({
@@ -85,7 +85,8 @@ export function useAuthentication(
     }
     updateCredentials(null);
     setRunning(false);
-  }, [socket, setRunning, updateCredentials]);
+    setResult(null);
+  }, [socket, setRunning, setResult, updateCredentials]);
 
   useEffect(() => {
     return () => {

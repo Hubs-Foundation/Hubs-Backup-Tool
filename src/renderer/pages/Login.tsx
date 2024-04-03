@@ -65,6 +65,10 @@ export default function Login(): JSX.Element {
     window.electronAPI.openInBrowser("mailto:hubs-feedback@mozilla.com");
   }, []);
 
+  const showErrorLog = useCallback(() => {
+    return running || (result !== null);
+  }, [running, result]);
+
 
   return (
     <form noValidate autoComplete="on" onSubmit={handleSubmit}>
@@ -144,46 +148,41 @@ export default function Login(): JSX.Element {
           </Button>
         </Grid>
         <Grid item xs={12} marginTop={2}>
-          {running && (
+          {showErrorLog() && (
             <Grid
               container
               alignItems={"center"}
               direction={"row"}
               sx={{
                 borderRadius: 1,
-                bgcolor: "primary.main",
+                bgcolor: running
+                  ? "primary.main"
+                  : result
+                    ? "success.main"
+                    : "error.main",
               }}
               padding={2}
             >
-              <Grid item xs={11}>
+              <Grid item xs={12}>
                 <Typography
                   fontWeight={"bold"}
                   fontSize={"small"}
                   color={"white"}
                   marginBottom={1}
+                  style={{ wordWrap: "break-word" }}
                 >
-                  {`Email sent to ${email}.`}
+                  {running && <>
+                    {`Email sent to ${email}.`}<br /><br />
+                    {`To continue, click on the link in the email using your phone, tablet, or PC. If you are having trouble finding this email, please check your spam or junk folders.`}<br /><br />
+                    {`If you still cannot locate the log-in email, please contact us:`}
+                    {<IconButton onClick={handleMail} size="small">
+                      <MailIcon fontSize="small" sx={{ color: "white" }} />
+                    </IconButton>}
+                  </>}
+                  {(!running && result === false) && <>
+                    {`An error happened when connecting to the server. Please check your connection settings and try again.`}
+                  </>}
                 </Typography>
-                <Typography
-                  fontWeight={"bold"}
-                  fontSize={"small"}
-                  color={"white"}
-                  marginBottom={1}
-                >
-                  {`To continue, click on the link in the email using your phone, tablet, or PC.`}
-                </Typography>
-                <Typography
-                  fontWeight={"bold"}
-                  fontSize={"small"}
-                  color={"white"}
-                >
-                  {`If you are having trouble finding this email, please check your spam or junk folders. If you still cannot locate the log-in email, please contact us:`}
-                </Typography>
-              </Grid>
-              <Grid item xs={1} textAlign={"end"}>
-                <IconButton onClick={handleMail} size="small">
-                  <MailIcon fontSize="small" sx={{ color: "white" }} />
-                </IconButton>
               </Grid>
             </Grid>
           )}

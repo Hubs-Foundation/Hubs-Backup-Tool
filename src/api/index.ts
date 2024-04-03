@@ -26,20 +26,25 @@ async function authReticulum(
   event: Electron.IpcMainInvokeEvent,
   params: IAuthReticulumParams
 ): Promise<IAuthReticulum> {
-  const meta = await getReticulumMeta(params.host, params.port);
-  const socket = await connectToReticulum({
-    debug: true,
-    host: meta.phx_host,
-    port: params.port,
-  });
+  try {
+    const meta = await getReticulumMeta(params.host, params.port);
+    const socket = await connectToReticulum({
+      debug: true,
+      host: meta.phx_host,
+      port: params.port,
+    });
 
-  const authChannel = new AuthChannel(socket);
-  const { getToken } = await authChannel.startAuthentication(params.email);
-  const token = (await getToken) as string;
+    const authChannel = new AuthChannel(socket);
+    const { getToken } = await authChannel.startAuthentication(params.email);
+    const token = (await getToken) as string;
 
-  socket.disconnect();
+    socket.disconnect();
 
-  return { token, accountId: credentialsAccountId(token) };
+    return { token, accountId: credentialsAccountId(token) };
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 async function getLogFilePath(

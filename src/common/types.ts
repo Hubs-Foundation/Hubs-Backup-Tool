@@ -1,7 +1,7 @@
 export type IAuthReticulum = {
   token: string;
   accountId: string;
-};
+} | null;
 
 export type IAuthCredentials = {
   email: string;
