@@ -41,7 +41,7 @@ export default function App({ children }: Props): JSX.Element {
     }, [setOpen]);
 
     const openHelp = useCallback(() => {
-        window.electronAPI.openInBrowser("https://hubs.mozilla.com/docs/downloading-your-data.html");
+        window.electronAPI.openInBrowser("https://hubs.mozilla.com/docs/download-data.html");
     }, []);
 
     return (
