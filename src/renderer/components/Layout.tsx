@@ -15,6 +15,8 @@ import Logout from "@mui/icons-material/Logout";
 import EmailIcon from "@mui/icons-material/Email";
 import StorageIcon from "@mui/icons-material/Storage";
 import HelpIcon from "@mui/icons-material/Help";
+import VideoIcon from "@mui/icons-material/VideoLibrary";
+import DocumentationIcon from "@mui/icons-material/TextSnippet";
 import hubsLogo from "../../../static/hubs.svg";
 
 type Props = {
@@ -41,6 +43,14 @@ export default function App({ children }: Props): JSX.Element {
     }, [setOpen]);
 
     const openHelp = useCallback(() => {
+        window.electronAPI.openInBrowser("https://hubs.mozilla.com/labs/downloading-your-data/");
+    }, []);
+
+    const openVideo = useCallback(() => {
+        window.electronAPI.openInBrowser("https://youtu.be/vnkgGLkcxuk");
+    }, []);
+
+    const openDocs = useCallback(() => {
         window.electronAPI.openInBrowser("https://hubs.mozilla.com/docs/download-data.html");
     }, []);
 
@@ -65,10 +75,17 @@ export default function App({ children }: Props): JSX.Element {
                     </Grid>
                 </Grid>
                 <Grid item xs={1} textAlign={"end"}>
-                    <IconButton onClick={openHelp} sx={{ padding: 0 }}>
+                    <IconButton onClick={openHelp}>
                         <HelpIcon fontSize="large" />
                     </IconButton>
+                    <IconButton onClick={openVideo}>
+                        <VideoIcon fontSize="large" />
+                    </IconButton>
+                    <IconButton onClick={openDocs}>
+                        <DocumentationIcon fontSize="large" />
+                    </IconButton>
                 </Grid>
+
             </Grid>
             {credentials && <Menu
                 id="basic-menu"
