@@ -107,40 +107,46 @@ async function backupBlenderProjects(
     const scenes = await api.getGLBScenes();
     const sceneNum = scenes.length;
     let count = 0;
+    let result = true;
     for (const scene of scenes) {
       if (cancel) {
         break;
       }
 
-      const sceneDir = path.join(projectlessOutputDir, scene.scene_id);
-      createDir(sceneDir);
+      try {
+        const sceneDir = path.join(projectlessOutputDir, scene.scene_id);
+        createDir(sceneDir);
 
-      writeFileSync(
-        path.join(sceneDir, `${scene.scene_id}.json`),
-        JSON.stringify(scene, null, 2),
-        {
-          encoding: "ascii",
-        }
-      );
-      const url = new URL(scene.model_url);
-      const fileName = url.pathname.split("/").pop();
-      if (fileName) {
-        await downloadFile({
-          url: scene.model_url,
-          outPath: path.join(sceneDir, fileName),
-          override,
-        });
-      }
-      if (scene.screenshot_url) {
-        const url = new URL(scene.screenshot_url);
+        writeFileSync(
+          path.join(sceneDir, `${scene.scene_id}.json`),
+          JSON.stringify(scene, null, 2),
+          {
+            encoding: "ascii",
+          }
+        );
+        const url = new URL(scene.model_url);
         const fileName = url.pathname.split("/").pop();
         if (fileName) {
           await downloadFile({
-            url: scene.screenshot_url,
+            url: scene.model_url,
             outPath: path.join(sceneDir, fileName),
             override,
           });
         }
+        if (scene.screenshot_url) {
+          const url = new URL(scene.screenshot_url);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: scene.screenshot_url,
+              outPath: path.join(sceneDir, fileName),
+              override,
+            });
+          }
+        }
+      } catch (e) {
+        log.error(e);
+        result = false;
       }
 
       count++;
@@ -149,7 +155,7 @@ async function backupBlenderProjects(
         pct: (count / sceneNum) * 100,
       });
     }
-    return true;
+    return result;
   } catch (e) {
     log.error(e);
     return false;
@@ -172,84 +178,91 @@ async function backupSpokeProjects(
     const projects = await api.getProjects();
     const projectsNum = projects.length;
     let count = 0;
+    let result = true;
     for (const project of projects) {
       if (cancel) {
         break;
       }
 
-      const projectScene = await api.getProjectScene(project.project_id);
-      const projectDir = path.join(projectsOutputDir, project.project_id);
-      createDir(projectDir);
+      try {
+        const projectScene = await api.getProjectScene(project.project_id);
+        const projectDir = path.join(projectsOutputDir, project.project_id);
+        createDir(projectDir);
 
-      writeFileSync(
-        path.join(projectDir, `${project.project_id}.json`),
-        JSON.stringify(project, null, 2),
-
-        { encoding: "ascii" }
-      );
-      writeFileSync(
-        path.join(projectDir, `${project.name}.spoke`),
-        JSON.stringify(project, null, 2),
-
-        { encoding: "ascii" }
-      );
-      if (project.project_url) {
-        const url = new URL(project.project_url);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: project.project_url,
-            outPath: path.join(projectDir, fileName),
-            override,
-          });
-        }
-      }
-      if (project.thumbnail_url) {
-        const url = new URL(project.thumbnail_url);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: project.thumbnail_url,
-            outPath: path.join(projectDir, fileName),
-            override,
-          });
-        }
-      }
-      if (projectScene.scene) {
         writeFileSync(
-          path.join(projectDir, `${projectScene.scene.scene_id}.json`),
-          JSON.stringify(projectScene, null, 2),
+          path.join(projectDir, `${project.project_id}.json`),
+          JSON.stringify(project, null, 2),
+
           { encoding: "ascii" }
         );
-        const url = new URL(projectScene.scene.model_url);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: projectScene.scene.model_url,
-            outPath: path.join(projectDir, fileName),
-            override,
-          });
-          const dotIdx = fileName.lastIndexOf(".");
-          const fileNameWithoutExt = fileName.substring(0, dotIdx);
-          copyFileSync(
-            path.join(projectDir, fileName),
-            path.join(projectDir, `${fileNameWithoutExt}.glb`)
-          );
-        }
-        if (projectScene.scene.screenshot_url) {
-          const url = new URL(projectScene.scene.screenshot_url);
+        writeFileSync(
+          path.join(projectDir, `${project.name}.spoke`),
+          JSON.stringify(project, null, 2),
+
+          { encoding: "ascii" }
+        );
+        if (project.project_url) {
+          const url = new URL(project.project_url);
           const fileName = url.pathname.split("/").pop();
           if (fileName) {
             await downloadFile({
-              url: projectScene.scene.screenshot_url,
+              url: project.project_url,
               outPath: path.join(projectDir, fileName),
               override,
             });
           }
         }
-      } else {
-        log.warn(`Project ${project.project_id} doesn't have a scene`);
+        if (project.thumbnail_url) {
+          const url = new URL(project.thumbnail_url);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: project.thumbnail_url,
+              outPath: path.join(projectDir, fileName),
+              override,
+            });
+          }
+        }
+        if (projectScene.scene) {
+          writeFileSync(
+            path.join(projectDir, `${projectScene.scene.scene_id}.json`),
+            JSON.stringify(projectScene, null, 2),
+            { encoding: "ascii" }
+          );
+          const url = new URL(projectScene.scene.model_url);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: projectScene.scene.model_url,
+              outPath: path.join(projectDir, fileName),
+              override,
+            });
+            const dotIdx = fileName.lastIndexOf(".");
+            const fileNameWithoutExt = fileName.substring(0, dotIdx);
+            copyFileSync(
+              path.join(projectDir, fileName),
+              path.join(projectDir, `${fileNameWithoutExt}.glb`)
+            );
+          }
+          if (projectScene.scene.screenshot_url) {
+            const url = new URL(projectScene.scene.screenshot_url);
+            const fileName = url.pathname.split("/").pop();
+            if (fileName) {
+              await downloadFile({
+                url: projectScene.scene.screenshot_url,
+                outPath: path.join(projectDir, fileName),
+                override,
+              });
+            }
+          }
+        } else {
+          log.warn(`Project ${project.project_id} doesn't have a scene`);
+        }
+      } catch (e) {
+        log.error(e);
+        result = false;
       }
+
       count++;
       mainWindow.webContents.send("backup-progress-update", {
         type: IBackupTypes.Scenes,
@@ -257,7 +270,7 @@ async function backupSpokeProjects(
       });
     }
 
-    return true;
+    return result;
   } catch (e) {
     log.error(e);
     return false;
@@ -367,6 +380,7 @@ async function backupAvatars(
     });
     const avatarsNum = avatarListings.length;
     let count = 0;
+    let result = true;
     for (const avatarListing of avatarListings) {
       if (cancel) {
         break;
@@ -375,112 +389,117 @@ async function backupAvatars(
       const avatarDir = path.join(avatarsOutputDir, avatarListing.id);
       createDir(avatarDir);
 
-      const avatar = await api.getAvatar(avatarListing.id);
-      writeFileSync(
-        path.join(avatarDir, `${avatar.avatar_id}.json`),
-        JSON.stringify(avatar, null, 2),
-        { encoding: "ascii" }
-      );
-      if (avatar.files.base_map) {
-        const url = new URL(avatar.files.base_map);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.base_map,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+      try {
+        const avatar = await api.getAvatar(avatarListing.id);
+        writeFileSync(
+          path.join(avatarDir, `${avatar.avatar_id}.json`),
+          JSON.stringify(avatar, null, 2),
+          { encoding: "ascii" }
+        );
+        if (avatar.files.base_map) {
+          const url = new URL(avatar.files.base_map);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.base_map,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.files.emissive_map) {
-        const url = new URL(avatar.files.emissive_map);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.emissive_map,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+        if (avatar.files.emissive_map) {
+          const url = new URL(avatar.files.emissive_map);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.emissive_map,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.files.normal_map) {
-        const url = new URL(avatar.files.normal_map);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.normal_map,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+        if (avatar.files.normal_map) {
+          const url = new URL(avatar.files.normal_map);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.normal_map,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.files.orm_map) {
-        const url = new URL(avatar.files.orm_map);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.orm_map,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+        if (avatar.files.orm_map) {
+          const url = new URL(avatar.files.orm_map);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.orm_map,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.files.bin) {
-        const url = new URL(avatar.files.bin);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.bin,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+        if (avatar.files.bin) {
+          const url = new URL(avatar.files.bin);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.bin,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.files.gltf) {
-        const url = new URL(avatar.files.gltf);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.gltf,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+        if (avatar.files.gltf) {
+          const url = new URL(avatar.files.gltf);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.gltf,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.files.thumbnail) {
-        const url = new URL(avatar.files.thumbnail);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.files.thumbnail,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
+        if (avatar.files.thumbnail) {
+          const url = new URL(avatar.files.thumbnail);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.files.thumbnail,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+          }
         }
-      }
-      if (avatar.gltf_url) {
-        const url = new URL(avatar.gltf_url);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.gltf_url,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
-          processAvatarGLTF(path.join(avatarDir, fileName));
+        if (avatar.gltf_url) {
+          const url = new URL(avatar.gltf_url);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.gltf_url,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+            processAvatarGLTF(path.join(avatarDir, fileName));
+          }
         }
-      }
-      if (avatar.base_gltf_url) {
-        const url = new URL(avatar.base_gltf_url);
-        const fileName = url.pathname.split("/").pop();
-        if (fileName) {
-          await downloadFile({
-            url: avatar.base_gltf_url,
-            outPath: path.join(avatarDir, fileName),
-            override,
-          });
-          processAvatarGLTF(path.join(avatarDir, fileName));
+        if (avatar.base_gltf_url) {
+          const url = new URL(avatar.base_gltf_url);
+          const fileName = url.pathname.split("/").pop();
+          if (fileName) {
+            await downloadFile({
+              url: avatar.base_gltf_url,
+              outPath: path.join(avatarDir, fileName),
+              override,
+            });
+            processAvatarGLTF(path.join(avatarDir, fileName));
+          }
         }
+      } catch (e) {
+        log.error(e);
+        result = false;
       }
 
       count++;
@@ -490,7 +509,7 @@ async function backupAvatars(
       });
     }
 
-    return true;
+    return result;
   } catch (e) {
     log.error(e);
     return false;
@@ -518,31 +537,38 @@ async function backupRooms(
     });
     const roomsNum = rooms.length;
     let count = 0;
+    let result = true;
     for (const hub of rooms) {
       if (cancel) {
         break;
       }
 
-      const hubDir = path.join(roomsOutputDir, hub.id);
-      createDir(hubDir);
+      try {
+        const hubDir = path.join(roomsOutputDir, hub.id);
+        createDir(hubDir);
 
-      writeFileSync(
-        path.join(hubDir, `${hub.id}.json`),
-        JSON.stringify(hub, null, 2),
-        {
-          encoding: "ascii",
+        writeFileSync(
+          path.join(hubDir, `${hub.id}.json`),
+          JSON.stringify(hub, null, 2),
+          {
+            encoding: "ascii",
+          }
+        );
+
+        const url = new URL(api.getRoomObjectsUrl(hub.id));
+        const fileName = url.pathname.split("/").pop();
+        if (fileName) {
+          const objectsGLTFPath = path.join(hubDir, fileName);
+          await downloadFile({
+            url: url.toString(),
+            outPath: objectsGLTFPath,
+            override,
+          });
+          await processObjectsGLTF(hubDir, objectsGLTFPath, override);
         }
-      );
-      const url = new URL(api.getRoomObjectsUrl(hub.id));
-      const fileName = url.pathname.split("/").pop();
-      if (fileName) {
-        const objectsGLTFPath = path.join(hubDir, fileName);
-        await downloadFile({
-          url: url.toString(),
-          outPath: objectsGLTFPath,
-          override,
-        });
-        await processObjectsGLTF(hubDir, objectsGLTFPath, override);
+      } catch (e) {
+        log.error(e);
+        result = false;
       }
 
       count++;
@@ -552,7 +578,7 @@ async function backupRooms(
       });
     }
 
-    return true;
+    return result;
   } catch (e) {
     log.error(e);
     return false;
@@ -585,6 +611,7 @@ async function backupMedia(
     );
     const assetsNum = assets.length;
     let count = 0;
+    let result = true;
     for (const asset of assets) {
       if (cancel) {
         break;
@@ -603,6 +630,7 @@ async function backupMedia(
         }
       } catch (e) {
         log.error(`Media ${asset.url} is not a valid URL, skipping`);
+        result = false;
       }
 
       count++;
@@ -612,7 +640,7 @@ async function backupMedia(
       });
     }
 
-    return true;
+    return result;
   } catch (e) {
     log.error(e);
     return false;
@@ -626,10 +654,15 @@ export async function startBackup(
 ): Promise<boolean> {
   cancel = false;
 
-  log.transports.file.level = "info";
-  log.transports.file.resolvePathFn = () => getLogPath(directory, credentials);
-
   const { directory, types, credentials, override } = options;
+
+  log.initialize();
+  log.transports.file.level = "info";
+  log.transports.file.resolvePathFn = () =>
+    getLogPath(options.directory, credentials);
+  const file = log.transports.file.getFile();
+  file.clear();
+
   const outputPath = getOutputPath(directory, credentials);
   if (!existsSync(outputPath)) {
     if (!mkdirSync(outputPath, { recursive: true })) {
@@ -719,29 +752,49 @@ export async function getSupportedEndpoints(
   });
 
   let result = 0;
-  const spoke = await api.getProjects();
-  spoke && (result |= IBackupTypes.Scenes);
-  const blender = await api.getGLBScenes();
-  blender && (result |= IBackupTypes.Blender);
-  const rooms = await api.getMedia<HubT>({
-    accountId: credentials.accountId,
-    type: "rooms",
-    filter: "created",
-    probe: true,
-  });
-  rooms && (result |= IBackupTypes.Rooms);
-  const media = await api.getMedia<AssetT>({
-    accountId: credentials.accountId,
-    type: "assets",
-    probe: true,
-  });
-  media && (result |= IBackupTypes.Media);
-  const avatars = await api.getMedia<AvatarListingT>({
-    accountId: credentials.accountId,
-    type: "avatars",
-    probe: true,
-  });
-  avatars && (result |= IBackupTypes.Avatars);
+  try {
+    const spoke = await api.getProjects();
+    spoke && (result |= IBackupTypes.Scenes);
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    const blender = await api.getGLBScenes();
+    blender && (result |= IBackupTypes.Blender);
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    const rooms = await api.getMedia<HubT>({
+      accountId: credentials.accountId,
+      type: "rooms",
+      filter: "created",
+      probe: true,
+    });
+    rooms && (result |= IBackupTypes.Rooms);
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    const media = await api.getMedia<AssetT>({
+      accountId: credentials.accountId,
+      type: "assets",
+      probe: true,
+    });
+    media && (result |= IBackupTypes.Media);
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    const avatars = await api.getMedia<AvatarListingT>({
+      accountId: credentials.accountId,
+      type: "avatars",
+      probe: true,
+    });
+    avatars && (result |= IBackupTypes.Avatars);
+  } catch (e) {
+    console.error(e);
+  }
 
   return result;
 }
