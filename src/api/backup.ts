@@ -121,7 +121,7 @@ async function backupBlenderProjects(
           path.join(sceneDir, `${scene.scene_id}.json`),
           JSON.stringify(scene, null, 2),
           {
-            encoding: "ascii",
+            encoding: "utf-8",
           }
         );
         const url = new URL(scene.model_url);
@@ -193,13 +193,7 @@ async function backupSpokeProjects(
           path.join(projectDir, `${project.project_id}.json`),
           JSON.stringify(project, null, 2),
 
-          { encoding: "ascii" }
-        );
-        writeFileSync(
-          path.join(projectDir, `${project.name}.spoke`),
-          JSON.stringify(project, null, 2),
-
-          { encoding: "ascii" }
+          { encoding: "utf-8" }
         );
         if (project.project_url) {
           const url = new URL(project.project_url);
@@ -210,6 +204,10 @@ async function backupSpokeProjects(
               outPath: path.join(projectDir, fileName),
               override,
             });
+            copyFileSync(
+              path.join(projectDir, fileName),
+              path.join(projectDir, `${project.name}.spoke`)
+            );
           }
         }
         if (project.thumbnail_url) {
@@ -227,7 +225,7 @@ async function backupSpokeProjects(
           writeFileSync(
             path.join(projectDir, `${projectScene.scene.scene_id}.json`),
             JSON.stringify(projectScene, null, 2),
-            { encoding: "ascii" }
+            { encoding: "utf-8" }
           );
           const url = new URL(projectScene.scene.model_url);
           const fileName = url.pathname.split("/").pop();
@@ -394,7 +392,7 @@ async function backupAvatars(
         writeFileSync(
           path.join(avatarDir, `${avatar.avatar_id}.json`),
           JSON.stringify(avatar, null, 2),
-          { encoding: "ascii" }
+          { encoding: "utf-8" }
         );
         if (avatar.files.base_map) {
           const url = new URL(avatar.files.base_map);
@@ -551,7 +549,7 @@ async function backupRooms(
           path.join(hubDir, `${hub.id}.json`),
           JSON.stringify(hub, null, 2),
           {
-            encoding: "ascii",
+            encoding: "utf-8",
           }
         );
 
@@ -607,7 +605,7 @@ async function backupMedia(
       path.join(assetsOutputDir, `assets.json`),
       JSON.stringify(assets, null, 2),
 
-      { encoding: "ascii" }
+      { encoding: "utf-8" }
     );
     const assetsNum = assets.length;
     let count = 0;
