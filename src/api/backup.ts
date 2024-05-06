@@ -8,7 +8,13 @@ import {
   copyFileSync,
 } from "fs";
 import fetch from "node-fetch";
-import { AssetT, AvatarListingT, HubT, ReticulumApi } from "./reticulum-api";
+import {
+  AssetT,
+  AvatarListingT,
+  HubT,
+  ReticulumApi,
+  SceneT,
+} from "./reticulum-api";
 import path from "path";
 import {
   IAuthCredentials,
@@ -162,6 +168,45 @@ async function backupBlenderProjects(
   }
 }
 
+async function backupScene(
+  api: ReticulumApi,
+  scene: SceneT,
+  projectDir: string,
+  override: boolean
+) {
+  writeFileSync(
+    path.join(projectDir, `${scene.scene_id}.json`),
+    JSON.stringify(scene, null, 2),
+    { encoding: "utf-8" }
+  );
+  const url = new URL(scene.model_url);
+  const fileName = url.pathname.split("/").pop();
+  if (fileName) {
+    await downloadFile({
+      url: scene.model_url,
+      outPath: path.join(projectDir, fileName),
+      override,
+    });
+    const dotIdx = fileName.lastIndexOf(".");
+    const fileNameWithoutExt = fileName.substring(0, dotIdx);
+    copyFileSync(
+      path.join(projectDir, fileName),
+      path.join(projectDir, `${fileNameWithoutExt}.glb`)
+    );
+  }
+  if (scene.screenshot_url) {
+    const url = new URL(scene.screenshot_url);
+    const fileName = url.pathname.split("/").pop();
+    if (fileName) {
+      await downloadFile({
+        url: scene.screenshot_url,
+        outPath: path.join(projectDir, fileName),
+        override,
+      });
+    }
+  }
+}
+
 async function backupSpokeProjects(
   api: ReticulumApi,
   directory: string,
@@ -222,37 +267,9 @@ async function backupSpokeProjects(
           }
         }
         if (projectScene.scene) {
-          writeFileSync(
-            path.join(projectDir, `${projectScene.scene.scene_id}.json`),
-            JSON.stringify(projectScene, null, 2),
-            { encoding: "utf-8" }
-          );
-          const url = new URL(projectScene.scene.model_url);
-          const fileName = url.pathname.split("/").pop();
-          if (fileName) {
-            await downloadFile({
-              url: projectScene.scene.model_url,
-              outPath: path.join(projectDir, fileName),
-              override,
-            });
-            const dotIdx = fileName.lastIndexOf(".");
-            const fileNameWithoutExt = fileName.substring(0, dotIdx);
-            copyFileSync(
-              path.join(projectDir, fileName),
-              path.join(projectDir, `${fileNameWithoutExt}.glb`)
-            );
-          }
-          if (projectScene.scene.screenshot_url) {
-            const url = new URL(projectScene.scene.screenshot_url);
-            const fileName = url.pathname.split("/").pop();
-            if (fileName) {
-              await downloadFile({
-                url: projectScene.scene.screenshot_url,
-                outPath: path.join(projectDir, fileName),
-                override,
-              });
-            }
-          }
+          backupScene(api, projectScene.scene, projectDir, override);
+        } else if (projectScene.parent_scene) {
+          backupScene(api, projectScene.parent_scene, projectDir, override);
         } else {
           log.warn(`Project ${project.project_id} doesn't have a scene`);
         }

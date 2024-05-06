@@ -53,7 +53,7 @@ export interface ProjectT {
 
 export interface ProjectSceneT {
   name: string;
-  parent_scene: string | null;
+  parent_scene: SceneT | null;
   project_id: string;
   project_url: string;
   scene: SceneT | null;
