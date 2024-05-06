@@ -37,7 +37,7 @@ const Tooltips = {
   [IBackupTypes.Blender]:
     'Downloads 3D models of all scenes uploaded using the "Import from Blender" method on Spoke',
   [IBackupTypes.Scenes]: "Downloads all Spoke Scenes uploaded to this account, including .spoke legacy files",
-  [IBackupTypes.Rooms]: "Downloads all pinned media from rooms created by this account",
+  [IBackupTypes.Rooms]: "Downloads all pinned media from rooms created by this account. BitECS pinned objects are not supported.",
   [IBackupTypes.Media]: 'Downloads all media uploaded through Spoke located in the "My Assets" tab',
 };
 
