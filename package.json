@@ -1,7 +1,7 @@
 {
   "name": "hubs-backup-tool",
   "productName": "Hubs Backup Tool",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Tool for backing up your assets from a Hubs instance",
   "main": ".webpack/main",
   "scripts": {
