@@ -168,17 +168,64 @@ async function backupBlenderProjects(
   }
 }
 
+async function processSpokeScene(
+  sceneUrl: string,
+  projectDir: string,
+  override: boolean
+) {
+  const url = new URL(sceneUrl);
+  const fileName = url.pathname.split("/").pop();
+  if (fileName) {
+    await downloadFile({
+      url: sceneUrl,
+      outPath: path.join(projectDir, fileName),
+      override,
+    });
+    try {
+      const fileText = readFileSync(path.join(projectDir, fileName), {
+        encoding: "utf-8",
+      }) as never;
+      const parsed = JSON.parse(fileText);
+      if ("entities" in parsed) {
+        for (const entity in parsed["entities"]) {
+          const thisEntity = parsed["entities"][entity];
+          if ("components" in thisEntity) {
+            for (const component of thisEntity["components"]) {
+              if ("src" in component["props"]) {
+                const src = component["props"]["src"];
+                const assetUrl = new URL(src);
+                const assetFileName = assetUrl.pathname.split("/").pop();
+                await downloadFile({
+                  url: component["props"]["src"],
+                  outPath: path.join(projectDir, assetFileName),
+                  override,
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      log.error(e);
+    }
+  }
+}
+
 async function backupScene(
   api: ReticulumApi,
   scene: SceneT,
   projectDir: string,
   override: boolean
 ) {
-  writeFileSync(
-    path.join(projectDir, `${scene.scene_id}.json`),
-    JSON.stringify(scene, null, 2),
-    { encoding: "utf-8" }
-  );
+  const spokeFilePath = path.join(projectDir, `${scene.scene_id}.json`);
+  writeFileSync(spokeFilePath, JSON.stringify(scene, null, 2), {
+    encoding: "utf-8",
+  });
+
+  if (scene.scene_project_url) {
+    await processSpokeScene(scene.scene_project_url, projectDir, override);
+  }
+
   const url = new URL(scene.model_url);
   const fileName = url.pathname.split("/").pop();
   if (fileName) {
@@ -253,6 +300,7 @@ async function backupSpokeProjects(
               path.join(projectDir, fileName),
               path.join(projectDir, `${project.name}.spoke`)
             );
+            await processSpokeScene(project.project_url, projectDir, override);
           }
         }
         if (project.thumbnail_url) {
