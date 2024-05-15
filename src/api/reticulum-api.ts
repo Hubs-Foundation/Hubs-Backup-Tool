@@ -40,6 +40,7 @@ export interface SceneT {
   screenshot_url: string;
   type: ReticulumAssetType;
   url: string;
+  scene_project_url?: string;
 }
 
 export interface ProjectT {
