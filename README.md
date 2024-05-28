@@ -8,8 +8,3 @@ You can get the executable version of the tool from the [releases](https://githu
 - Clone this repository
 - Install the dependencies: `npm install`
 - Run it: `npm run start`
-
-### How to use this tool
-- Tool Overview: https://hubs.mozilla.com/labs/downloading-your-data
-- Written Docs: https://hubs.mozilla.com/docs/download-data.html
-- Youtube Video: TBD

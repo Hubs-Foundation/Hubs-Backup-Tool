@@ -40,7 +40,7 @@ export function useStorage(): {
     localStorage.getItem("lastLogin")
       ? JSON.parse(localStorage.getItem("lastLogin"))
       : {
-          host: "hubs.mozilla.com",
+          host: "your.host.com",
           port: "",
           email: "",
         }
