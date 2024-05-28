@@ -8,3 +8,6 @@ You can get the executable version of the tool from the [releases](https://githu
 - Clone this repository
 - Install the dependencies: `npm install`
 - Run it: `npm run start`
+
+### How to use this tool
+- [Download Data](https://github.com/MozillaReality/hubs-docs/blob/master/docs/download-data.md)
