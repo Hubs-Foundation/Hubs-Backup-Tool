@@ -61,10 +61,6 @@ export default function Login(): JSX.Element {
     }
   };
 
-  const handleMail = useCallback(() => {
-    window.electronAPI.openInBrowser("mailto:hubs-feedback@mozilla.com");
-  }, []);
-
   const showErrorLog = useCallback(() => {
     return running || (result !== null);
   }, [running, result]);
@@ -76,7 +72,7 @@ export default function Login(): JSX.Element {
         <Grid item xs={8}>
           <TextField
             variant="outlined"
-            placeholder="hubs.mozilla.com"
+            placeholder="your.host.com"
             required={true}
             label="Host"
             fullWidth
@@ -88,7 +84,7 @@ export default function Login(): JSX.Element {
           />
         </Grid>
         <Grid item xs={1} alignSelf={"center"}>
-          <Tooltip title="The host name of the Hubs instance with your data (ex. hubs.mozilla.com or 12345.us1.myhubs.net). Do not include https or url paths.">
+          <Tooltip title="The host name of the Hubs instance with your data (ex. https://your.host.com). Do not include https or url paths.">
             <HelpIcon sx={{ verticalAlign: "middle", color: "grey" }} />
           </Tooltip>
         </Grid>
@@ -173,11 +169,7 @@ export default function Login(): JSX.Element {
                 >
                   {running && <>
                     {`Email sent to ${email}.`}<br /><br />
-                    {`To continue, click on the link in the email using your phone, tablet, or PC. If you are having trouble finding this email, please check your spam or junk folders.`}<br /><br />
-                    {`If you still cannot locate the log-in email, please contact us:`}
-                    {<IconButton onClick={handleMail} size="small">
-                      <MailIcon fontSize="small" sx={{ color: "white" }} />
-                    </IconButton>}
+                    {`To continue, click on the link in the email using your phone, tablet, or PC. If you are having trouble finding this email, please check your spam or junk folders.`}
                   </>}
                   {(!running && result === false) && <>
                     {`An error happened when connecting to the server. Please check your connection settings and try again.`}

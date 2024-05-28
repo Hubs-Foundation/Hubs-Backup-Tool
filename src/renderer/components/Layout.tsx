@@ -42,16 +42,8 @@ export default function App({ children }: Props): JSX.Element {
         setOpen(false);
     }, [setOpen]);
 
-    const openHelp = useCallback(() => {
-        window.electronAPI.openInBrowser("https://hubs.mozilla.com/labs/downloading-your-data/");
-    }, []);
-
     const openVideo = useCallback(() => {
         window.electronAPI.openInBrowser("https://youtu.be/vnkgGLkcxuk");
-    }, []);
-
-    const openDocs = useCallback(() => {
-        window.electronAPI.openInBrowser("https://hubs.mozilla.com/docs/download-data.html");
     }, []);
 
     return (
@@ -75,14 +67,8 @@ export default function App({ children }: Props): JSX.Element {
                     </Grid>
                 </Grid>
                 <Grid item xs={1} textAlign={"end"}>
-                    <IconButton onClick={openHelp}>
-                        <HelpIcon fontSize="large" />
-                    </IconButton>
                     <IconButton onClick={openVideo}>
                         <VideoIcon fontSize="large" />
-                    </IconButton>
-                    <IconButton onClick={openDocs}>
-                        <DocumentationIcon fontSize="large" />
                     </IconButton>
                 </Grid>
 
