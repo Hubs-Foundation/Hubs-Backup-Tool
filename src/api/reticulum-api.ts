@@ -144,6 +144,10 @@ interface MediaWithCursorT {
   probe?: boolean;
 }
 
+function sanitizedURL(url: string) {
+  return url.replace(/([^:]\/)\/+/g, "$1");
+}
+
 export class ReticulumApi {
   options: ReticulumApiOptions;
 
@@ -152,15 +156,17 @@ export class ReticulumApi {
   }
 
   getUrl(path: string): string {
-    return `https://${this.options.host}${
+    const url = `https://${this.options.host}${
       this.options.port ? ":" + this.options.port : ""
     }/api/v1/${path}`;
+    return sanitizedURL(url);
   }
 
   getRoomObjectsUrl(hubId: string) {
-    return `https://${this.options.host}${
+    const url = `https://${this.options.host}${
       this.options.port ? ":" + this.options.port : ""
     }/${hubId}/objects.gltf`;
+    return sanitizedURL(url);
   }
 
   api(path: string, method = "GET", payload?: JSON): Promise<any> {
