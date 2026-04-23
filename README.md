@@ -1,4 +1,10 @@
-## Hubs Backup Tool
+# [OBSOLETE] Hubs Backup Tool
+
+This tool has known security vulnerabilities and is no longer maintained.
+
+**See [How to back up your Hubs instance](https://github.com/Hubs-Foundation/Hubs-Backup-Tool) for the supported tool.**
+
+---
 
 This tool let you backup your assets from a Hubs instance (Demo Hub, Hubs Subscription Service or your own instance).
 
