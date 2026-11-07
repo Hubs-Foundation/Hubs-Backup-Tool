@@ -10,4 +10,4 @@ You can get the executable version of the tool from the [releases](https://githu
 - Run it: `npm run start`
 
 ### How to use this tool
-- [Download Data](https://github.com/Hubs-Foundation/hubs-docs/blob/master/docs/download-data.md)
+- [Download Data](https://github.com/Hubs-Foundation/hubs-docs/blob/master/docs/download-data.mdx)
